@@ -12,6 +12,17 @@ The modules will include at least 2 VCOs, 2 LFOs, 2 VCAs, 1 sequencer,
 miscellaneous modules. This works by scanning for your installed
 plugins, and going through the registered module models' tags.
 
+## How to use
+
+Easiest way to get started:
+
+* Clear your patch (Ctrl+N)
+* Add WhatTheRack
+* Hit the *?* button
+* Try to make music with what just appeared!
+* Want more modules? Click the *?* button again. Or don't, and enjoy
+  the challenge of working with what you got.
+
 ## Is this serious?
 
 Kinda. It started as a joke: VCV Rack is missing an essential part of
