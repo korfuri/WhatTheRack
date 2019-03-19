@@ -1,7 +1,7 @@
 
 # What The Rack
 
-WhatTheRack is a plugin for [https://vcvrack.com](VCV Rack). It
+WhatTheRack is a plugin for [VCV Rack](https://vcvrack.com). It
 contains a single eponymous module with a single button. When you
 press the button, What The Rack will add 19 random modules plus an
 audio interface and a scope. All modules' parameters are randomized,
