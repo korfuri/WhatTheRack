@@ -4,6 +4,9 @@
 #include <random>
 #include <thread>
 
+static std::random_device rd;
+static std::mt19937 g(rd());
+
 void SpawnModel(Model* model) {
   ModuleWidget *moduleWidget = model->createModuleWidget();
   if (!moduleWidget) {
@@ -16,9 +19,6 @@ void SpawnModel(Model* model) {
 }
 
 void SpawnAFewModels(std::vector<Model*>& models, int n) {
-  std::random_device rd;
-  std::mt19937 g(rd());
- 
   std::shuffle(models.begin(), models.end(), g);
   for (auto it = models.begin(); it != models.end() && n > 0; ++it, --n) {
     Model* m = *it;
@@ -111,7 +111,7 @@ struct WhatTheRack : Module {
   std::vector<Model*> miscs;
   std::vector<Model*> mixers;
   std::vector<Model*> basics;
-  
+
   void step() override {}
 };
 
@@ -120,7 +120,7 @@ struct BoomButton : SVGButton {
     setSVGs(SVG::load(assetPlugin(plugin, "res/BoomButton/question_color.svg")),
 	    SVG::load(assetPlugin(plugin, "res/BoomButton/question_bw.svg")));
   }
-  
+
   virtual void onAction(EventAction &e) override {
       SpawnAFewModels(module->vcos, 2);
       SpawnAFewModels(module->lfos, 2);
@@ -132,7 +132,7 @@ struct BoomButton : SVGButton {
       SpawnAFewModels(module->envelopes, 2);
       SpawnAFewModels(module->miscs, 3);
       SpawnAFewModels(module->mixers, 1);
-      SpawnAFewModels(module->basics, 10);    
+      SpawnAFewModels(module->basics, 10);
   }
 
   WhatTheRack* module;
