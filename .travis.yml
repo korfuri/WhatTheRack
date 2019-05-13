@@ -1,0 +1,39 @@
+language: cpp
+matrix:
+  include:
+  - os: linux
+    dist: xenial
+  - os: osx
+  - os: windows
+    before_install:
+    - choco install make -y
+    - choco install zip -y
+addons:
+  apt:
+    packages:
+    - libglu1-mesa-dev
+git:
+  submodules: true
+env:
+  global:
+  - MAKEFLAGS="-j 2"
+install:
+- mkdir -p "${HOME}"/Rack
+- pushd "${HOME}"/Rack
+- curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-0.6.2.zip
+- unzip Rack-SDK.zip
+- popd
+script:
+- export RACK_DIR="${HOME}"/Rack/Rack-SDK
+- make dep
+- make dist
+deploy:
+  provider: releases
+  api_key:
+    secure: PwBJIB0owWoIKC81yHy4SqNjjPcFWTUZV2nbeHQuaRda2dFauWYF3HQGYxxcvY2dUowa4hZTHHiouPbTGAAUbI6ZuZO/IrRwZEeLxITtjUHA7X2hf8NCCd13A6wNl0VLDfldbY6NNO26NafpOa9WgfJ3g7BVvorupLOAuBPcHLIqBG61jqw5Wn9XVzWWMuuaNesDtbon3eDKmBBEUnqYECMq+EWcpSCloLzSPC037p41+c3rf0q80I49/xNPu3q2pjDyq33aIIRXEXm4uR0kOEUKg93u7gXSIHcqRcyYYAVT3P8JvyCo8kWI2eZm2Z0COHLk473rmimHCAO+FuLiM1rDIKljVFNrWaZyDamHDtV/hzQZW5zeib63zaTBpYmvp6bKdkVe6CpuBLCNIh0EYEtDuKiIv4IQCMz1xwL/ILkeF5+S8Bt2msXqkUwP9WpgJQCvIZ3hWsfjQU8dlUS25fxSle2BmCZS6EzHGh4/ApBsaYGMgikrgaWo787vgIMG6YD466Z+pSUmPZkOnIWokhCBO6YXLQO08oZT/4OIcUQCxJhN51LUrnHLUBHXHeImpumg4v2I0fQvVTN9WUGd7o88OLNb56LfsWAOL1CQMZ/KOJVjgWjmBKZWTLe6DbM6iR/+LhgqfeVuCeoXtAOO+7Swp5/L4uX4eDzpd+PbBAQ=
+  file_glob: true
+  file: dist/WhatTheRack-*-*.zip
+  skip_cleanup: true  # Don't remove dist/ before uploading files
+  on:
+    repo: korfuri/WhatTheRack
+    tags: true
