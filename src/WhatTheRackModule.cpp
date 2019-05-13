@@ -6,8 +6,7 @@
 #include <functional>
 #include <random>
 
-static std::random_device rd;
-static std::mt19937 g(rd());
+static std::mt19937 g(randomu32());
 
 void SpawnModel(Model* model) {
   ModuleWidget *moduleWidget = model->createModuleWidget();

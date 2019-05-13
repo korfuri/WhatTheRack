@@ -2,7 +2,6 @@
 #include "plugin.hpp"
 #include "window.hpp"
 #include "CallbackButton.hpp"
-#include <random>
 
 struct WhatTheJack : Module {
   enum ParamIds {
@@ -52,8 +51,8 @@ struct WhatTheJack : Module {
     }
 
     // Pick a random input and output port
-    int iidx = std::rand() % inputs.size();
-    int oidx = std::rand() % outputs.size();
+    int iidx = randomu32() % inputs.size();
+    int oidx = randomu32() % outputs.size();
 
     // Create a wire
     WireWidget* w = new WireWidget();
