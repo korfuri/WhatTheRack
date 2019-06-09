@@ -18,18 +18,20 @@ struct WhatTheJack : Module {
     NUM_LIGHTS
   };
 
-  WhatTheJack() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {}
+  WhatTheJack() {
+    config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+  }
 
-  void step() override {}
+  void process(const ProcessArgs &args) override {}
 
   static void walkWidgetTree(Widget* root,
-			     std::vector<Port*>* inputs,
-			     std::vector<Port*>* outputs) {
+			     std::vector<PortWidget*>* inputs,
+			     std::vector<PortWidget*>* outputs) {
     for (Widget* w : root->children) {
-      Port* p = dynamic_cast<Port*>(w);
-      if (p) {
-	if (p->type == Port::INPUT) {
-	  if (!gRackWidget->wireContainer->getTopWire(p)) {
+      PortWidget* p = dynamic_cast<PortWidget*>(w);
+      if (p) {	
+	if (p->type == PortWidget::INPUT) {
+	  if (!APP->scene->rack->getTopCable(p)) {
 	    inputs->push_back(p);
 	  }
 	} else {
@@ -43,43 +45,46 @@ struct WhatTheJack : Module {
 
   void spawnWire() {
     // List all input and output ports in the Rack
-    std::vector<Port*> inputs, outputs;
-    walkWidgetTree(gRackWidget, &inputs, &outputs);
+    std::vector<PortWidget*> inputs, outputs;
+    walkWidgetTree(APP->scene->rack, &inputs, &outputs);
 
     if (outputs.size() < 1 || inputs.size() < 1) {
       return;
     }
 
     // Pick a random input and output port
-    int iidx = randomu32() % inputs.size();
-    int oidx = randomu32() % outputs.size();
+    int iidx = (int)random::u32() % inputs.size();
+    int oidx = (int)random::u32() % outputs.size();
 
     // Create a wire
-    WireWidget* w = new WireWidget();
-    w->inputPort = inputs[iidx];
-    gRackWidget->wireContainer->setActiveWire(w);
-    w->hoveredOutputPort = outputs[oidx];
-    gRackWidget->wireContainer->commitActiveWire();
+    CableWidget* w = new CableWidget();
+    w->setOutput(outputs[oidx]);
+    w->setInput(inputs[iidx]);
+    APP->scene->rack->addCable(w);
+    history::CableAdd *h = new history::CableAdd;
+    h->setCable(w);
+    APP->history->push(h);
   }
 };
 
 typedef CallbackButton<WhatTheJack> CB;
 
 struct WhatTheJackWidget : ModuleWidget {
-  WhatTheJackWidget(WhatTheJack *module) : ModuleWidget(module) {
-    setPanel(SVG::load(assetPlugin(plugin, "res/WhatTheJack.svg"))); // fixme
+  WhatTheJackWidget(WhatTheJack *module) {
+    setModule(module);
+    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WhatTheJack.svg")));
 
-    addChild(Widget::create<ScrewSilver>(Vec(0, 0)));
-    addChild(Widget::create<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, 0)));
-    addChild(Widget::create<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-    addChild(Widget::create<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-    std::shared_ptr<rack::SVG> idle = SVG::load(assetPlugin(plugin, "res/BoomButton/question_color.svg"));
-    std::shared_ptr<rack::SVG> clicked = SVG::load(assetPlugin(plugin, "res/BoomButton/question_bw.svg"));
+    std::shared_ptr<rack::Svg> idle = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_color.svg"));
+    std::shared_ptr<rack::Svg> clicked = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_bw.svg"));
     addChild(CB::create(Vec(50, 272), [](WhatTheJack* module){
 	  module->spawnWire();
 	}, module, idle, clicked));
   }
 };
 
-Model *modelWhatTheJack = Model::create<WhatTheJack, WhatTheJackWidget>("WhatTheRack", "WhatTheJack", "WhatTheJack - Wire randomizer", UTILITY_TAG);
+Model *modelWhatTheJack = createModel<WhatTheJack, WhatTheJackWidget>("WhatTheJack");

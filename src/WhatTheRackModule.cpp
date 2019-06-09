@@ -6,17 +6,19 @@
 #include <functional>
 #include <random>
 
-static std::mt19937 g(randomu32());
+static std::mt19937 g(random::u32());
 
 void SpawnModel(Model* model) {
   ModuleWidget *moduleWidget = model->createModuleWidget();
   if (!moduleWidget) {
     return;
   }
-  gRackWidget->addModule(moduleWidget);
-  moduleWidget->box.pos = Vec(0, 0);
-  gRackWidget->requestModuleBoxNearest(moduleWidget, moduleWidget->box);
-  moduleWidget->randomize();
+  APP->scene->rack->addModuleAtMouse(moduleWidget);
+  history::ModuleAdd *h = new history::ModuleAdd;
+  h->name = "create module";
+  h->setModule(moduleWidget);
+  APP->history->push(h);
+  moduleWidget->randomizeAction();
 }
 
 void SpawnAFewModels(std::vector<Model*>& models, int n) {
@@ -29,7 +31,6 @@ void SpawnAFewModels(std::vector<Model*>& models, int n) {
 
 struct WhatTheRack : Module {
   enum ParamIds {
-    GENERATE_BUTTON,
     NUM_PARAMS
   };
   enum InputIds {
@@ -42,52 +43,56 @@ struct WhatTheRack : Module {
     NUM_LIGHTS
   };
 
-  WhatTheRack() :
-    Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS)
-  {
-    for (const auto& p : rack::gPlugins) {
+  WhatTheRack() {
+    config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+    for (const auto& p : rack::plugin::plugins) {
       for (const auto& m : p->models) {
 	for (const auto& t : m->tags) {
-	  switch (t) {
-	  case rack::OSCILLATOR_TAG:
-	    vcos.push_back(m); break;
-	  case rack::LFO_TAG:
-	    lfos.push_back(m); break;
-	  case AMPLIFIER_TAG:
-	  case ENVELOPE_FOLLOWER_TAG:
-	    vcas.push_back(m); break;
-	  case SEQUENCER_TAG:
-	    sequencers.push_back(m); break;
-	  case CLOCK_TAG:
-	    clocks.push_back(m); break;
-	  case COMPRESSOR_TAG:
-	  case DELAY_TAG:
-	  case DISTORTION_TAG:
-	  case EFFECT_TAG:
-	  case FLANGER_TAG:
-	  case PANNING_TAG:
-	  case PHASER_TAG:
-	  case REVERB_TAG:
-	  case RING_MODULATOR_TAG:
-	  case VOCODER_TAG:
-	  case WAVESHAPER_TAG:
-	    effects.push_back(m); break;
-	  case FILTER_TAG:
-	    filters.push_back(m); break;
-	  case ENVELOPE_GENERATOR_TAG:
-	    envelopes.push_back(m); break;
-	  case CLOCK_MODULATOR_TAG:
-	  case SAMPLE_AND_HOLD_TAG:
-	  case RECORDING_TAG:
-	  case SLEW_LIMITER_TAG:
-	  case SWITCH_TAG:
-	  case UTILITY_TAG:
-	    miscs.push_back(m); break;
-	  case MIXER_TAG:
-	    mixers.push_back(m); break;
-	  default:
-	    // Ignore unknown tags.
-	    break;
+	  if (t == "VCO") {
+	    vcos.push_back(m);
+	  }
+	  if (t == "LFO") {
+	    lfos.push_back(m);
+	  }
+	  if (t == "VCA" ||
+	      t == "Envelope follower") {
+	    vcas.push_back(m);
+	  }
+	  if (t == "Sequencer") {
+	    sequencers.push_back(m);
+	  }
+	  if (t == "Clock generator") {
+	    clocks.push_back(m);
+	  }
+	  if (t == "Compressor" ||
+	      t == "Delay" ||
+	      t == "Distortion" ||
+	      t == "Effect" ||
+	      t == "Flanger" ||
+	      t == "Panning" ||
+	      t == "Phaser" ||
+	      t == "Reverb" ||
+	      t == "Ring modulator" ||
+	      t == "Vocoder" ||
+	      t == "Waveshaper") {
+	    effects.push_back(m);
+	  }
+	  if (t == "VCF") {
+	    filters.push_back(m);
+	  }
+	  if (t == "Envelope generator") {
+	    envelopes.push_back(m);
+	  }
+	  if (t == "Clock modulator" ||
+	      t == "Sample and hold" ||
+	      t == "Recording" ||
+	      t == "Slew limiter" ||
+	      t == "Switch" ||
+	      t == "Utility") {
+	    miscs.push_back(m);
+	  }
+	  if (t == "Mixer") {
+	    mixers.push_back(m);
 	  }
 	}
 
@@ -111,22 +116,23 @@ struct WhatTheRack : Module {
   std::vector<Model*> mixers;
   std::vector<Model*> basics;
 
-  void step() override {}
+  void process(const ProcessArgs &args) override {}
 };
 
 typedef CallbackButton<WhatTheRack> CB;
 
 struct WhatTheRackWidget : ModuleWidget {
-  WhatTheRackWidget(WhatTheRack *module) : ModuleWidget(module) {
-    setPanel(SVG::load(assetPlugin(plugin, "res/WhatTheRack.svg")));
+  WhatTheRackWidget(WhatTheRack *module) {
+    setModule(module);
+    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WhatTheRack.svg")));
 
-    addChild(Widget::create<ScrewSilver>(Vec(0, 0)));
-    addChild(Widget::create<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, 0)));
-    addChild(Widget::create<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-    addChild(Widget::create<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-    std::shared_ptr<rack::SVG> idle = SVG::load(assetPlugin(plugin, "res/BoomButton/question_color.svg"));
-    std::shared_ptr<rack::SVG> clicked = SVG::load(assetPlugin(plugin, "res/BoomButton/question_bw.svg"));
+    std::shared_ptr<rack::Svg> idle = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_color.svg"));
+    std::shared_ptr<rack::Svg> clicked = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_bw.svg"));
     addChild(CB::create(Vec(50, 272), [](WhatTheRack* module){
 	  SpawnAFewModels(module->vcos, 2);
 	  SpawnAFewModels(module->lfos, 2);
@@ -144,17 +150,17 @@ struct WhatTheRackWidget : ModuleWidget {
 };
 
 struct WhatTheModWidget : ModuleWidget {
-  WhatTheModWidget(WhatTheRack *module) : ModuleWidget(module) {
-    setPanel(SVG::load(assetPlugin(plugin, "res/WhatTheMod.svg")));
+  WhatTheModWidget(WhatTheRack *module) {
+		setModule(module);
+    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WhatTheMod.svg")));
 
-    addChild(Widget::create<ScrewSilver>(Vec(0, 0)));
-    addChild(Widget::create<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, 0)));
-    addChild(Widget::create<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-    addChild(Widget::create<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, 0)));
+    addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+    addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-    std::shared_ptr<rack::SVG> idle = SVG::load(assetPlugin(plugin, "res/BoomButton/question_color.svg"));
-    std::shared_ptr<rack::SVG> clicked = SVG::load(assetPlugin(plugin, "res/BoomButton/question_bw.svg"));
-
+    std::shared_ptr<rack::Svg> idle = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_color.svg"));
+    std::shared_ptr<rack::Svg> clicked = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_bw.svg"));
     addChild(CB::create(Vec(20, 63), [](WhatTheRack* m){ SpawnAFewModels(m->vcos, 1); }, module, idle, clicked));
     addChild(CB::create(Vec(20, 95), [](WhatTheRack* m){ SpawnAFewModels(m->lfos, 1); }, module, idle, clicked));
     addChild(CB::create(Vec(20, 127), [](WhatTheRack* m){ SpawnAFewModels(m->vcas, 1); }, module, idle, clicked));
@@ -168,5 +174,5 @@ struct WhatTheModWidget : ModuleWidget {
   }
 };
 
-Model *modelWhatTheRack = Model::create<WhatTheRack, WhatTheRackWidget>("WhatTheRack", "WhatTheRack", "WhatTheRack - Rack randomizer", UTILITY_TAG);
-Model *modelWhatTheMod = Model::create<WhatTheRack, WhatTheModWidget>("WhatTheRack", "WhatTheMod", "WhatTheMod - Module randomizer", UTILITY_TAG);
+Model *modelWhatTheRack = createModel<WhatTheRack, WhatTheRackWidget>("WhatTheRack");
+Model *modelWhatTheMod = createModel<WhatTheRack, WhatTheModWidget>("WhatTheMod");
