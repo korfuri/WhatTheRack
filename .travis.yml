@@ -12,6 +12,10 @@ addons:
   apt:
     packages:
     - libglu1-mesa-dev
+  homebrew:
+    update: true
+    packages:
+    - jq
 git:
   submodules: true
 env:
@@ -20,7 +24,7 @@ env:
 install:
 - mkdir -p "${HOME}"/Rack
 - pushd "${HOME}"/Rack
-- curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-0.6.2.zip
+- curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-1.0.0.zip
 - unzip Rack-SDK.zip
 - popd
 script:
