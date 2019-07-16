@@ -51,6 +51,22 @@ struct WhatTheRack : Module {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
     for (const auto& p : rack::plugin::plugins) {
       for (const auto& m : p->models) {
+	if ((p->slug == "Core" && m->slug == "AudioInterface") ||
+	    (p->slug == "Fundamental" && m->slug == "Scope")) {
+	  basics.push_back(m); continue;
+	}
+
+	bool skip = false;
+	for (const auto& t : m->tags) {
+	  if (t == "External") {
+	    skip = true;
+	  }
+	}
+	if (skip) {
+	  continue;
+	}
+
+
 	for (const auto& t : m->tags) {
 	  if (t == "VCO") {
 	    vcos.push_back(m);
@@ -98,11 +114,6 @@ struct WhatTheRack : Module {
 	  if (t == "Mixer") {
 	    mixers.push_back(m);
 	  }
-	}
-
-	if ((p->slug == "Core" && m->slug == "AudioInterface") ||
-	    (p->slug == "Fundamental" && m->slug == "Scope")) {
-	  basics.push_back(m); break;
 	}
       }
     }
