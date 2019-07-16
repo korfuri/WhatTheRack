@@ -1,6 +1,7 @@
 #include "WhatTheRack.hpp"
 #include "plugin.hpp"
 #include "window.hpp"
+#include "logger.hpp"
 #include "CallbackButton.hpp"
 #include <algorithm>
 #include <functional>
@@ -9,8 +10,10 @@
 static std::mt19937 g(random::u32());
 
 void SpawnModel(Model* model) {
+  INFO("WhatTheRack will spawn a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
   ModuleWidget *moduleWidget = model->createModuleWidget();
   if (!moduleWidget) {
+    WARN("WhatTheRack was unable to spawn a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
     return;
   }
   APP->scene->rack->addModuleAtMouse(moduleWidget);
@@ -19,6 +22,7 @@ void SpawnModel(Model* model) {
   h->setModule(moduleWidget);
   APP->history->push(h);
   moduleWidget->randomizeAction();
+  INFO("WhatTheRack successfully spawned a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
 }
 
 void SpawnAFewModels(std::vector<Model*>& models, int n) {
