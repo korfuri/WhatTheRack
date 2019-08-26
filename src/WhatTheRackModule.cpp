@@ -2,6 +2,7 @@
 #include "plugin.hpp"
 #include "window.hpp"
 #include "logger.hpp"
+#include "tag.hpp"
 #include "CallbackButton.hpp"
 #include <algorithm>
 #include <functional>
@@ -57,8 +58,8 @@ struct WhatTheRack : Module {
 	}
 
 	bool skip = false;
-	for (const auto& t : m->tags) {
-	  if (t == "External") {
+	for (int t : m->tags) {
+	  if (t == rack::tag::findId("External")) {
 	    skip = true;
 	  }
 	}
@@ -67,51 +68,51 @@ struct WhatTheRack : Module {
 	}
 
 
-	for (const auto& t : m->tags) {
-	  if (t == "VCO") {
+	for (int t : m->tags) {
+	  if (t == rack::tag::findId("VCO")) {
 	    vcos.push_back(m);
 	  }
-	  if (t == "LFO") {
+	  if (t == rack::tag::findId("LFO")) {
 	    lfos.push_back(m);
 	  }
-	  if (t == "VCA" ||
-	      t == "Envelope follower") {
+	  if (t == rack::tag::findId("VCA") ||
+	      t == rack::tag::findId("Envelope follower")) {
 	    vcas.push_back(m);
 	  }
-	  if (t == "Sequencer") {
+	  if (t == rack::tag::findId("Sequencer")) {
 	    sequencers.push_back(m);
 	  }
-	  if (t == "Clock generator") {
+	  if (t == rack::tag::findId("Clock generator")) {
 	    clocks.push_back(m);
 	  }
-	  if (t == "Compressor" ||
-	      t == "Delay" ||
-	      t == "Distortion" ||
-	      t == "Effect" ||
-	      t == "Flanger" ||
-	      t == "Panning" ||
-	      t == "Phaser" ||
-	      t == "Reverb" ||
-	      t == "Ring modulator" ||
-	      t == "Vocoder" ||
-	      t == "Waveshaper") {
+	  if (t == rack::tag::findId("Compressor") ||
+	      t == rack::tag::findId("Delay") ||
+	      t == rack::tag::findId("Distortion") ||
+	      t == rack::tag::findId("Effect") ||
+	      t == rack::tag::findId("Flanger") ||
+	      t == rack::tag::findId("Panning") ||
+	      t == rack::tag::findId("Phaser") ||
+	      t == rack::tag::findId("Reverb") ||
+	      t == rack::tag::findId("Ring modulator") ||
+	      t == rack::tag::findId("Vocoder") ||
+	      t == rack::tag::findId("Waveshaper")) {
 	    effects.push_back(m);
 	  }
-	  if (t == "VCF") {
+	  if (t == rack::tag::findId("VCF")) {
 	    filters.push_back(m);
 	  }
-	  if (t == "Envelope generator") {
+	  if (t == rack::tag::findId("Envelope generator")) {
 	    envelopes.push_back(m);
 	  }
-	  if (t == "Clock modulator" ||
-	      t == "Sample and hold" ||
-	      t == "Recording" ||
-	      t == "Slew limiter" ||
-	      t == "Switch" ||
-	      t == "Utility") {
+	  if (t == rack::tag::findId("Clock modulator") ||
+	      t == rack::tag::findId("Sample and hold") ||
+	      t == rack::tag::findId("Recording") ||
+	      t == rack::tag::findId("Slew limiter") ||
+	      t == rack::tag::findId("Switch") ||
+	      t == rack::tag::findId("Utility")) {
 	    miscs.push_back(m);
 	  }
-	  if (t == "Mixer") {
+	  if (t == rack::tag::findId("Mixer")) {
 	    mixers.push_back(m);
 	  }
 	}
