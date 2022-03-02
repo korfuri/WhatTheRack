@@ -59,7 +59,7 @@ struct WhatTheRack : Module {
 	}
 
 	bool skip = false;
-	for (int t : m->tags) {
+	for (int t : m->tagIds) {
 	  if (t == rack::tag::findId("External")) {
 	    skip = true;
 	  }
@@ -69,7 +69,7 @@ struct WhatTheRack : Module {
 	}
 
 
-	for (int t : m->tags) {
+	for (int t : m->tagIds) {
 	  if (t == rack::tag::findId("VCO")) {
 	    vcos.push_back(m);
 	  }
