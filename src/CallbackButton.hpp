@@ -2,7 +2,6 @@
 #define CALLBACK_BUTTON_HPP__
 
 #include "plugin.hpp"
-#include "window.hpp"
 #include <functional>
 
 template<typename T>
@@ -22,12 +21,19 @@ struct CallbackButton : SvgButton {
 
   CallbackButton() {}
 
-  virtual void onAction(const event::Action &e) override {
-    e.consume(this);
-    callback(module);
-    SvgButton::onAction(e);
-  }
+  // virtual void onAction(const event::Action &e) override {
+  //   e.consume(this);
+  //   callback(module);
+  //   SvgButton::onAction(e);
+  // }
 
+  virtual void onButton(const widget::Widget::ButtonEvent &e) override {
+    OpaqueWidget::onButton(e);
+    if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+        e.consume(this);
+        callback(module);
+    }
+  }
   std::function<void (T*)> callback;
   T* module;
 };
