@@ -1,6 +1,5 @@
 #include "WhatTheRack.hpp"
 #include "plugin.hpp"
-#include "window.hpp"
 #include "CallbackButton.hpp"
 
 struct WhatTheJack : Module {
@@ -30,15 +29,15 @@ struct WhatTheJack : Module {
     for (Widget* w : root->children) {
       PortWidget* p = dynamic_cast<PortWidget*>(w);
       if (p) {	
-	if (p->type == PortWidget::INPUT) {
-	  if (!APP->scene->rack->getTopCable(p)) {
-	    inputs->push_back(p);
-	  }
-	} else {
-	  outputs->push_back(p);
-	}
+        if (p->type == engine::Port::INPUT) {
+          if (!APP->scene->rack->getTopCable(p)) {
+            inputs->push_back(p);
+          }
+        } else {
+          outputs->push_back(p);
+        }
       } else {
-	walkWidgetTree(w, inputs, outputs);
+        walkWidgetTree(w, inputs, outputs);
       }
     }
   }
@@ -57,11 +56,14 @@ struct WhatTheJack : Module {
     int oidx = (int)random::u32() % outputs.size();
 
     // Create a wire
-    CableWidget* w = new CableWidget();
-    w->setOutput(outputs[oidx]);
-    w->setInput(inputs[iidx]);
-    APP->scene->rack->addCable(w);
+    CableWidget *w = new CableWidget;
+    w->inputPort = inputs[iidx];
+    w->outputPort = outputs[oidx];
+    w->color = APP->scene->rack->getNextCableColor();
+    w->updateCable();
+    if (w->isComplete()) APP->scene->rack->addCable(w);
     history::CableAdd *h = new history::CableAdd;
+    h->name = "create cable";
     h->setCable(w);
     APP->history->push(h);
   }

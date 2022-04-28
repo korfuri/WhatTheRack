@@ -1,7 +1,4 @@
 #include "WhatTheRack.hpp"
-#include "plugin.hpp"
-#include "window.hpp"
-#include "logger.hpp"
 #include "tag.hpp"
 #include "CallbackButton.hpp"
 #include <algorithm>
@@ -12,12 +9,14 @@ static std::mt19937 g(random::u32());
 
 void SpawnModel(Model* model) {
   INFO("WhatTheRack will spawn a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
-  ModuleWidget *moduleWidget = model->createModuleWidget();
+  Module *module = model->createModule();
+  ModuleWidget *moduleWidget = model->createModuleWidget(module);
   if (!moduleWidget) {
     WARN("WhatTheRack was unable to spawn a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
     return;
   }
   APP->scene->rack->addModuleAtMouse(moduleWidget);
+  APP->engine->addModule(module);
   history::ModuleAdd *h = new history::ModuleAdd;
   h->name = "create module";
   h->setModule(moduleWidget);
@@ -58,7 +57,7 @@ struct WhatTheRack : Module {
 	}
 
 	bool skip = false;
-	for (int t : m->tags) {
+	for (int t : m->tagIds) {
 	  if (t == rack::tag::findId("External")) {
 	    skip = true;
 	  }
@@ -68,7 +67,7 @@ struct WhatTheRack : Module {
 	}
 
 
-	for (int t : m->tags) {
+	for (int t : m->tagIds) {
 	  if (t == rack::tag::findId("VCO")) {
 	    vcos.push_back(m);
 	  }
