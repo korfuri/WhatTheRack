@@ -1,7 +1,4 @@
 #include "WhatTheRack.hpp"
-#include "plugin.hpp"
-#include "logger.hpp"
-#include "tag.hpp"
 #include "CallbackButton.hpp"
 #include <algorithm>
 #include <functional>

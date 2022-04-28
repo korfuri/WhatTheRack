@@ -1,4 +1,5 @@
-#include "rack.hpp"
+#pragma once
+#include <rack.hpp>
 
 
 using namespace rack;

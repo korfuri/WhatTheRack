@@ -1,7 +1,6 @@
 #ifndef CALLBACK_BUTTON_HPP__
 #define CALLBACK_BUTTON_HPP__
 
-#include "plugin.hpp"
 #include <functional>
 
 template<typename T>
