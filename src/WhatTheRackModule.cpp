@@ -15,8 +15,9 @@ void SpawnModel(Model* model) {
     WARN("WhatTheRack was unable to spawn a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
     return;
   }
-  APP->scene->rack->addModuleAtMouse(moduleWidget);
   APP->engine->addModule(module);
+  APP->scene->rack->updateModuleOldPositions();
+  APP->scene->rack->addModuleAtMouse(moduleWidget);
   history::ModuleAdd *h = new history::ModuleAdd;
   h->name = "create module";
   h->setModule(moduleWidget);
