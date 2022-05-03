@@ -7,7 +7,7 @@
 
 static std::mt19937 g(random::u32());
 
-void SpawnModel(Model* model) {
+void SpawnModel(Model* model, bool randomize = false) {
   INFO("WhatTheRack will spawn a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
   Module *module = model->createModule();
   ModuleWidget *moduleWidget = model->createModuleWidget(module);
@@ -22,15 +22,17 @@ void SpawnModel(Model* model) {
   h->name = "create module";
   h->setModule(moduleWidget);
   APP->history->push(h);
-  moduleWidget->randomizeAction();
+  if (randomize) {
+    moduleWidget->randomizeAction();
+  }
   INFO("WhatTheRack successfully spawned a %s/%s module.", model->plugin->slug.c_str(), model->slug.c_str());
 }
 
-void SpawnAFewModels(std::vector<Model*>& models, int n) {
+void SpawnAFewModels(std::vector<Model*>& models, int n, bool randomize = false) {
   std::shuffle(models.begin(), models.end(), g);
   for (auto it = models.begin(); it != models.end() && n > 0; ++it, --n) {
     Model* m = *it;
-    SpawnModel(m);
+    SpawnModel(m, randomize);
   }
 }
 
@@ -47,6 +49,8 @@ struct WhatTheRack : Module {
   enum LightIds {
     NUM_LIGHTS
   };
+
+  bool randomize_params = false;
 
   WhatTheRack() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -150,22 +154,31 @@ struct WhatTheRackWidget : ModuleWidget {
     std::shared_ptr<rack::Svg> idle = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_color.svg"));
     std::shared_ptr<rack::Svg> clicked = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_bw.svg"));
     addChild(CB::create(Vec(50, 272), [](WhatTheRack* module){
-	  SpawnAFewModels(module->vcos, 2);
-	  SpawnAFewModels(module->lfos, 2);
-	  SpawnAFewModels(module->vcas, 2);
-	  SpawnAFewModels(module->sequencers, 1);
-	  SpawnAFewModels(module->clocks, 1);
-	  SpawnAFewModels(module->effects, 3);
-	  SpawnAFewModels(module->filters, 2);
-	  SpawnAFewModels(module->envelopes, 2);
-	  SpawnAFewModels(module->miscs, 3);
-	  SpawnAFewModels(module->mixers, 1);
-	  SpawnAFewModels(module->basics, 10);
+	  SpawnAFewModels(module->vcos, 2, module->randomize_params);
+	  SpawnAFewModels(module->lfos, 2, module->randomize_params);
+	  SpawnAFewModels(module->vcas, 2, module->randomize_params);
+	  SpawnAFewModels(module->sequencers, 1, module->randomize_params);
+	  SpawnAFewModels(module->clocks, 1, module->randomize_params);
+	  SpawnAFewModels(module->effects, 3, module->randomize_params);
+	  SpawnAFewModels(module->filters, 2, module->randomize_params);
+	  SpawnAFewModels(module->envelopes, 2, module->randomize_params);
+	  SpawnAFewModels(module->miscs, 3, module->randomize_params);
+	  SpawnAFewModels(module->mixers, 1, module->randomize_params);
+	  SpawnAFewModels(module->basics, 10, module->randomize_params);
 	}, module, idle, clicked));
+  }
+
+  void appendContextMenu(Menu* menu) override {
+    WhatTheRack* module = dynamic_cast<WhatTheRack*>(this->module);
+    assert(module);
+
+    menu->addChild(new MenuSeparator());
+    menu->addChild(createBoolPtrMenuItem("Randomize Parameters", "", &module->randomize_params));
   }
 };
 
 struct WhatTheModWidget : ModuleWidget {
+  bool randomize_params = false;
   WhatTheModWidget(WhatTheRack *module) {
 		setModule(module);
     setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/WhatTheMod.svg")));
@@ -177,16 +190,24 @@ struct WhatTheModWidget : ModuleWidget {
 
     std::shared_ptr<rack::Svg> idle = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_color.svg"));
     std::shared_ptr<rack::Svg> clicked = APP->window->loadSvg(asset::plugin(pluginInstance, "res/BoomButton/question_bw.svg"));
-    addChild(CB::create(Vec(20, 63), [](WhatTheRack* m){ SpawnAFewModels(m->vcos, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 95), [](WhatTheRack* m){ SpawnAFewModels(m->lfos, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 127), [](WhatTheRack* m){ SpawnAFewModels(m->vcas, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 159), [](WhatTheRack* m){ SpawnAFewModels(m->sequencers, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 191), [](WhatTheRack* m){ SpawnAFewModels(m->clocks, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 223), [](WhatTheRack* m){ SpawnAFewModels(m->effects, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 255), [](WhatTheRack* m){ SpawnAFewModels(m->filters, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 287), [](WhatTheRack* m){ SpawnAFewModels(m->envelopes, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 319), [](WhatTheRack* m){ SpawnAFewModels(m->mixers, 1); }, module, idle, clicked));
-    addChild(CB::create(Vec(20, 351), [](WhatTheRack* m){ SpawnAFewModels(m->miscs, 1); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 63), [](WhatTheRack* m){ SpawnAFewModels(m->vcos, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 95), [](WhatTheRack* m){ SpawnAFewModels(m->lfos, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 127), [](WhatTheRack* m){ SpawnAFewModels(m->vcas, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 159), [](WhatTheRack* m){ SpawnAFewModels(m->sequencers, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 191), [](WhatTheRack* m){ SpawnAFewModels(m->clocks, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 223), [](WhatTheRack* m){ SpawnAFewModels(m->effects, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 255), [](WhatTheRack* m){ SpawnAFewModels(m->filters, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 287), [](WhatTheRack* m){ SpawnAFewModels(m->envelopes, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 319), [](WhatTheRack* m){ SpawnAFewModels(m->mixers, 1, m->randomize_params); }, module, idle, clicked));
+    addChild(CB::create(Vec(20, 351), [](WhatTheRack* m){ SpawnAFewModels(m->miscs, 1, m->randomize_params); }, module, idle, clicked));
+  }
+
+  void appendContextMenu(Menu* menu) override {
+    WhatTheRack* module = dynamic_cast<WhatTheRack*>(this->module);
+    assert(module);
+
+    menu->addChild(new MenuSeparator());
+    menu->addChild(createBoolPtrMenuItem("Randomize Parameters", "", &module->randomize_params));
   }
 };
 
