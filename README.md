@@ -12,7 +12,8 @@ contains three modules:
 
 The eponymous module has a single button. When you press the button,
 WhatTheRack will spawn 19 random modules plus an audio interface and a
-scope. All modules' parameters are randomized, too.
+scope. If the option to "Randomize Parameters" is enabled in the context
+menu, the parameters of the spawned modules will be randomized.
 
 The modules will include at least 2 VCOs, 2 LFOs, 2 VCAs, 1 sequencer,
 1 clock, 3 effect modules, 2 filters, 2 envelopes, 1 mixer and 3
@@ -40,7 +41,8 @@ Easiest way to get started:
 This module is similar to WhatTheRack, but it will spawn a single
 module of a type of your choice (VCO, LFO, VCA, Sequencer, Clock,
 Effect, Filter, Envelope generator, Mixer or Misc). Like WhatTheRack,
-all parameters are randomized on the newly created module.
+enabling the "Randomize Parameters" option in the context menu will
+randomize the parameters of the spawned module.
 
 This is designed to help you get out of your routine - need a clock?
 Why not use one you've never tried! Need a VCO and not sure which one?
